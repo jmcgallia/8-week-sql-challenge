@@ -22,6 +22,17 @@ My solutions to the 8-week SQL challenge.
         GROUP BY customer_id;
       </code>
     </li>
-    <li>Problem 3</li>
+    <li>Problem 3
+      Subquery way
+    <code>
+      SELECT DISTINCT s.customer_id, m.product_name
+      FROM dannys_diner.sales s
+      INNER JOIN dannys_diner.menu m
+      ON s.product_id = m.product_id
+      WHERE s.order_date = (SELECT MIN(order_date)
+                            FROM dannys_diner.sales
+                            WHERE customer_id = s.customer_id)
+    </code>
+    </li>
   </ol>
 </details>
