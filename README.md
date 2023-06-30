@@ -6,6 +6,7 @@ My solutions to the 8-week SQL challenge.
 
 ### Question 1
 What is the total amount each customer spent at the restaurant?
+       
         ```
         SELECT s.customer_id, SUM(m.price) as total_spent
         FROM dannys_diner.sales s
@@ -13,13 +14,16 @@ What is the total amount each customer spent at the restaurant?
         ON s.product_id = m.product_id
         GROUP BY s.customer_id;
         ```
+
 ### Question 2
 How many days has each customer visited the restaurant?
+
         ```
         SELECT customer_id, COUNT(DISTINCT order_date) as days_visited
         FROM dannys_diner.sales
         GROUP BY customer_id;
         ```
+        
 ### Question 3
 What was the first item from the menu purchased by each customer?
 **Solution notes**: It is possible that someone has 2+ 'first items,' since we only have the 'day ordered'
