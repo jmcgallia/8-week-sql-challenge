@@ -196,3 +196,42 @@ FROM ppo
 WHERE order_date < '2021-02-01'
 GROUP BY customer_id;
 ```
+### Bonus Question 1
+
+```
+SELECT s.customer_id, s.order_date, m.product_name, m.price, 
+	CASE
+    	WHEN (me.join_date IS NOT NULL) AND (s.order_date >= me.join_date) THEN 'Y'
+        ELSE 'N'
+    END AS is_member
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+LEFT JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+ORDER BY s.customer_id, s.order_date;
+```
+
+### Bonus Question 2
+
+```
+WITH ppo AS
+(SELECT s.customer_id, s.order_date, m.product_name, m.price, 
+	CASE
+    	WHEN (me.join_date IS NOT NULL) AND (s.order_date >= me.join_date) THEN 'Y'
+        ELSE 'N'
+    END AS is_member
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+LEFT JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id
+ORDER BY s.customer_id, s.order_date)
+
+SELECT *, 
+	CASE 
+    	WHEN is_member = 'Y' THEN DENSE_RANK() OVER(PARTITION BY customer_id, is_member ORDER BY order_date)
+    	ELSE NULL
+    END AS rank
+FROM ppo;
+```
