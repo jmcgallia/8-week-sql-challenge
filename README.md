@@ -136,5 +136,63 @@ WHERE rank=1;
 This one was quite similar to #6, so I took the opportunity to do my comparisons in a more clear way which was easier to understand.
 
 ### Question 8
+What is the total items and amount spent for each member before they became a member? <br>
 
+```
+SELECT s.customer_id, COUNT(*) AS num_items, SUM(m.price) AS total_price
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+LEFT JOIN dannys_diner.members me
+ON me.customer_id = s.customer_id
+WHERE (s.order_date < me.join_date) OR (me.join_date IS NULL)
+GROUP BY s.customer_id
+ORDER BY s.customer_id;
+```
 
+My solution here assumes that someone who isn't yet a member (customer_id = C) will eventually be one, thus all their purchases should be counted. I noticed later that it would be more efficient to put a filter in my ON rather than using WHERE.
+
+### Question 9
+If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
+```
+WITH ppo AS
+(SELECT s.customer_id,
+	CASE
+    	WHEN m.product_name = 'sushi' THEN m.price * 20
+        ELSE m.price * 10
+    END AS points
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id)
+
+SELECT customer_id, SUM(points) as total_points
+FROM ppo
+GROUP BY customer_id
+ORDER BY customer_id;
+```
+
+This one was pretty straightforward.
+
+### Question 10
+In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+```
+WITH ppo AS
+(SELECT s.customer_id, s.order_date,
+	CASE
+    	WHEN m.product_name = 'sushi' THEN m.price * 20
+        WHEN s.order_date BETWEEN me.join_date AND me.join_date + 6 THEN m.price * 20
+        ELSE m.price * 10
+    END AS points
+FROM dannys_diner.sales s
+INNER JOIN dannys_diner.menu m
+ON s.product_id = m.product_id
+INNER JOIN dannys_diner.members me
+ON s.customer_id = me.customer_id)
+
+SELECT customer_id, SUM(points)
+FROM ppo
+WHERE order_date < '2021-02-01'
+GROUP BY customer_id;
+```
